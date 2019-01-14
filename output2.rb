@@ -13,6 +13,11 @@ class Output
 		return @队列数组[@最末队列的游标-1]
 	end
 
+	def 清空队列
+		@队列数组.clear
+		@最末队列的游标 = 0
+	end
+
 	def 读取_所有_队列(local_log=false)
 		当前时间=Time.new.to_s.byteslice(0,19)
 		Dir.exist?("/var/log/auto_op") || Dir.mkdir("/var/log/auto_op")

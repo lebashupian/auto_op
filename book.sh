@@ -1,4 +1,3 @@
-cd /root/Python-2.7.13
-make
 date
 date
+ps -ef|while read line; do echo $line; done
