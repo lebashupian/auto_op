@@ -401,7 +401,7 @@ end
 
 线程并发_总数=配置文件["config"]["thread_concurrency"].to_i
 线程并发_轮次计数=1;
-线程并发_轮次最大=(主机信息.num_rows.to_f/线程并发_总数.to_f).round;
+线程并发_轮次最大=(主机信息.num_rows.to_f/线程并发_总数.to_f).ceil;
 线程并发_最末轮次_计数=主机信息.num_rows % 线程并发_总数
 进度条 = ProgressBar.new(主机信息.num_rows);
 
