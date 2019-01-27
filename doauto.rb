@@ -141,7 +141,8 @@ ActiveRecord::Base.establish_connection(
     :username => db_user,  
     :password => db_pwd,  
     :database => db_schema,  
-    :host     => db_host
+    :host     => db_host,
+    :pool     => 10_1000  #如果这个设置的过小，下面并发的函数会报错
 )
 
 class C_数据库连接 < ActiveRecord::Base
@@ -283,8 +284,8 @@ class C_自动化操作
 		}
 	end
 
-	def 测试主机链接
-		主机信息=C_主机表.where(%Q[grp like '#{@主机grep}%']);
+	def 测试主机链接(匹配=nil)
+		主机信息=C_主机表.where(%Q[grp like '#{匹配}%']);
 		M_基础方法.退出信息("没有匹配到任何主机") if 主机信息.count == 0
 		进度条 = ProgressBar.new 主机信息.count;
 		主机信息.each {|主机行|
@@ -365,9 +366,11 @@ class C_自动化操作
 
 		线程并发_总数=@配置文件["config"]["thread_concurrency"].to_i
 		线程并发_轮次计数=1;
-		线程并发_轮次最大=(C_主机表.where(%Q[grp like '#{@主机grep}%']).count.to_f/线程并发_总数.to_f).round;
-		线程并发_最末轮次_计数=C_主机表.where(%Q[grp like '#{@主机grep}%']).count % 线程并发_总数
-		进度条 = ProgressBar.new(C_主机表.where(%Q[grp like '#{@主机grep}%']).count);
+
+		线程并发_轮次最大=(主机信息.count.to_f/线程并发_总数.to_f).ceil;
+
+		线程并发_最末轮次_计数=主机信息.count % 线程并发_总数
+		进度条 = ProgressBar.new(主机信息.count);
 
 		C_主机表.where(%Q[grp like '#{@主机grep}%']).each {|主机行|
 			主机ip,用户名,密码,端口=主机行.ip,主机行.username,主机行.password,主机行.port
@@ -385,7 +388,8 @@ class C_自动化操作
 					线程数组.each {|x|	x.join } && 线程数组_计数=0;
 					线程并发_轮次计数 += 1;
 			end
-			进度条.increment!	
+
+			进度条.increment!
 		}
 
 		@输出对象.读取_所有_队列(@配置文件["config"]["sshlog"])
@@ -408,13 +412,14 @@ if $脚本参数hash表["--behavior"]=='console'
 	def show(主机匹配=nil)
 		$实例.查询主机信息 主机匹配
 	end
-	def cs()
-		$实例.测试主机链接
+	def cs(主机匹配=nil)
+		$实例.测试主机链接 主机匹配
 	end
 
-	def x()
-		$命令信息,$命令类型="date","cmd"
-		$实例.主机grep = '.all'
+	def x(命令=nil,主机匹配=nil)
+
+		$命令信息,$命令类型=命令,"cmd"
+		$实例.主机grep = 主机匹配
 		$脚本参数hash表["--behavior"] = "x"
 		$实例.并发执行
 	end
