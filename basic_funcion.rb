@@ -33,19 +33,20 @@ module M_常量
 	CONS_帮助信息=%Q{请携带命令行参数:
 		--help       显示帮助信息
 		--behavior=cs 测试主机链接
-		--behavior=scp        远程传输文件
 		--behavior=x   远程执行命令
 		--behavior=info       打印所有的主机信息
 		--behavior=dbinit       初始化数据库结构
-		--behavior=greplog       初始化数据库结构
+		--behavior=chpasswd     自动修改主机账户密码，密码随机生成20位
 	注意：如果程序的输出太长，超过终端缓存行数，可以通过/tmp/下的'ssh.log.日期' 来查看日志
 		范例
 		doauto.rb --behavior=cs  
 		doauto.rb --behavior=dbinit
-		doauto.rb --behavior=scp --host=xxx --local=xxx --remote=xxx --direction=push|pull
 		doauto.rb --behavior=x --cmd=xxx --host=xxx
 		doauto.rb --behavior=x --script=xxx --host=xxx
-		doauto.rb --behavior=greplog --host=xxx --logfile=xxx --grepword=xxx --regex=xxx
+		doauto.rb --behavior=chpasswd --host=xxx
+	FAQ:
+		1,如果，你通过命令远程ssh，发现没有交互登录后所具有的环境变量，报命令找不到的错误。请将/etc/profile 和 ~/.bash_profile 里面配置的环境变量，复制到
+		~/.bashrc中。
 	}
 end
 

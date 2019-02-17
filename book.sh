@@ -1,3 +1,5 @@
 date
-date
-ps -ef|while read line; do echo $line; done
+find /etc|while read line
+do
+echo iiii$line
+done

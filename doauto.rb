@@ -4,6 +4,7 @@
 begin  #所有程序都放在一个测试块中，来捕捉Ctrl-C
 
 require_relative "basic_funcion"
+require "wxl_process_bar"
 
 ################
 # 命令提示符判断
@@ -64,7 +65,7 @@ p $脚本参数hash表 if 参数有? "--debug"
 
 M_基础方法.退出信息("你需要指定--behavior参数") if 没有? "--behavior"
 
-if 有? "--behavior" and !(a在b其中? $脚本参数hash表["--behavior"],'x scp cs info greplog dbinit console')
+if 有? "--behavior" and !(a在b其中? $脚本参数hash表["--behavior"],'x cs info dbinit console chpasswd')
 	M_基础方法.退出信息("--behavior参数的可选值有 x scp cs info greplog dbinit") 
 end
 
@@ -76,13 +77,7 @@ if 等于? "--behavior","x" and ( 没有? "--host" or ( 有? "--host" and 没有
 	M_基础方法.退出信息("必须指定--host=xxx")
 end
 
-if 等于? "--behavior","scp" and ( k或v缺失? "--local" or k或v缺失? "--remote" or k或v缺失? "--direction" or k或v缺失? "--host")
-	M_基础方法.退出信息("必须指定--host=xxx --local=xxx --remote=xxx --direction=push|pull")
-end
 
-if 等于? "--behavior","greplog" and ( k或v缺失? "--host" or k或v缺失? "--logfile" or 没有? "--grepword" or k或v缺失? "--regex")
-	M_基础方法.退出信息("必须指定--host=xxx --logfile=xxx --grepword=xxx --regex=xxx")
-end
 
 ################
 # 命令内容 注意，不要使用交互式的命令，否则程序会处于一直等待的状态！！
@@ -91,31 +86,6 @@ if $脚本参数hash表["--behavior"]=='x' and $脚本参数hash表.has_key?("--
 elsif $脚本参数hash表["--behavior"]=='x' and $脚本参数hash表.has_key?("--script")
 	$命令信息,$命令类型=$脚本参数hash表["--script"],"script"
 end
-################
-# 传输文件
-if $脚本参数hash表["--behavior"]=='scp'
-	$传输文件={};
-	$传输文件["本地文件"]=$脚本参数hash表["--local"]
-	$传输文件["远程文件"]=$脚本参数hash表["--remote"]
-	$传输文件["动作"]    ="未知动作"
-	$传输文件["动作"]    ="上载" if $脚本参数hash表["--direction"]=='push'
-	$传输文件["动作"]    ="下载" if $脚本参数hash表["--direction"]=='pull'
-end
-
-################
-# 正则分析日志
-if $脚本参数hash表["--behavior"]=='greplog'
-	$正则参数={};
-	$正则参数["日志文件名"]=$脚本参数hash表["--logfile"];
-	$正则参数["grep字符串"]=$脚本参数hash表["--grepword"];
-	$正则参数["正则表达式"]=$脚本参数hash表["--regex"];	
-end
-
-##################
-# 控制台交互
-
-
-
 
 
 #####################################################################################################
@@ -209,47 +179,7 @@ end
 初始化数据库结构 if $脚本参数hash表["--behavior"]=='dbinit'
 
 
-=begin
-require 'ipaddr'
-C_数据库连接.connection.execute("delete from hostinfo;")
 
-
-net1 = IPAddr.new("192.168.137.0/28")
-
-net1.to_range.each {|ip| 
-	主机表=C_主机表.new
-	p ip.to_s
-	主机表.ip=ip.to_s
-	主机表.username='root'
-	主机表.password='wxlnote'
-	主机表.port=22
-	主机表.grp='all'
-	主机表.used='Y'
-	主机表.save	
-}
-
-
-随机字符=Proc.new {|n|
-	str=''.dup
-	a=("a".."c").to_a
-	n.times {
-		str += a.sample
-	}
-	str
-}
-
-
-(41..46).each {|x|
-	主机表=C_主机表.new
-	主机表.ip="192.168.137.#{x}"
-	主机表.username='root'
-	主机表.password='wxlnote'
-	主机表.port=22
-	主机表.grp=随机字符.call(1)
-	主机表.used='Y'
-	主机表.save		
-}
-=end
 
 class C_自动化操作
 	attr_accessor :主机grep,:配置文件
@@ -260,6 +190,7 @@ class C_自动化操作
 	end
 
 	def 查询主机信息(主机匹配=nil)
+		主机匹配 ||= $脚本参数hash表["--host"]
 		主机信息=C_主机表.where(%Q[grp like '#{主机匹配}%']);
 		# 设置默认行长,然后针对每个字段遍历行的长度,
 		# 一旦发现有比现在的行更长的,
@@ -327,11 +258,14 @@ class C_自动化操作
 
 						M_基础方法.退出信息("#{$命令信息}脚本文件不存在") if !File.file?($命令信息)
 						脚本文件=File.open($命令信息,"r");
-						脚本文件行数 = 0;脚本文件.each_line {|x|  脚本文件行数 += 1 };脚本文件.rewind
-						脚本文件.each_line {|行|
-							输出命令 ||= ''
-							输出命令 << ssh.exec!("#{行}")
-						}
+						代码块=脚本文件.read
+						脚本文件.close
+						输出命令 = ssh.exec!(代码块)
+						#脚本文件行数 = 0;脚本文件.each_line {|x|  脚本文件行数 += 1 };脚本文件.rewind
+						#脚本文件.each_line {|行|
+						#	输出命令 ||= ''
+						#	输出命令 << ssh.exec!("#{行}")
+						#}
 						
 					else
 						M_基础方法.退出信息("无效的命令类型,请检查你的参数")
@@ -340,7 +274,7 @@ class C_自动化操作
 				  	输出命令.each_line {|行|
 				  		输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + 行
 				  	}
-				  	sleep 1
+				  	#sleep 1
 
 					运行记录.status='end'
 					运行记录.end_time=Time.new.to_s.byteslice(0,19)
@@ -352,6 +286,37 @@ class C_自动化操作
 			#exit 102
 		end
 	end
+
+	def 生成随机密码(密码长度=20)
+		密码=''.dup
+		全部数字=(0..9).to_a
+		小写字母=('a'..'z').to_a
+		大写字母=("A".."Z").to_a
+		随机空间=全部数字+小写字母+大写字母
+		密码长度.times {
+			密码 = 密码 + 随机空间.sample.to_s
+		}
+		密码
+	end
+
+	def 修改密码
+		主机信息=C_主机表.where(%Q[grp like '#{@主机grep}%']);
+		进度条2=C_进度条.new 主机信息.count
+		C_主机表.where(%Q[grp like '#{@主机grep}%']).each {|主机行|				
+			主机ip,用户名,密码,端口=主机行.ip,主机行.username,主机行.password,主机行.port
+
+			新密码=生成随机密码
+			$命令类型='cmd'
+			$命令信息="echo #{新密码}|passwd --stdin #{主机行.username}"
+			
+			远端执行命令(主机ip,用户名,密码,端口,@输出对象.生成一个队列)
+			主机行.password=新密码
+			主机行.save
+
+			进度条2.更新
+		}
+	end
+
 
 	def 并发执行
 		################
@@ -370,28 +335,52 @@ class C_自动化操作
 		线程并发_轮次最大=(主机信息.count.to_f/线程并发_总数.to_f).ceil;
 
 		线程并发_最末轮次_计数=主机信息.count % 线程并发_总数
+		#p 线程并发_总数
+		#p 线程并发_最末轮次_计数
 		进度条 = ProgressBar.new(主机信息.count);
+		进度条2=C_进度条.new 主机信息.count
+
+		#p 主机信息.count
 
 		C_主机表.where(%Q[grp like '#{@主机grep}%']).each {|主机行|
+
+
+				
 			主机ip,用户名,密码,端口=主机行.ip,主机行.username,主机行.password,主机行.port
 			线程数组 <<	Thread.new {
-			 				#远端传输文件(主机ip,用户名,密码,端口,$输出对象.生成一个队列,$传输文件["本地文件"],$传输文件["远程文件"],$传输文件["动作"]) if $脚本参数hash表["--behavior"] == 'scp'
-							远端执行命令(主机ip,用户名,密码,端口,@输出对象.生成一个队列) if $脚本参数hash表["--behavior"] == "x"
-							#正则分析日志(主机ip,用户名,密码,端口,$输出对象.生成一个队列,$正则参数["日志文件名"],$正则参数["grep字符串"],$正则参数["正则表达式"]) if $脚本参数hash表["--behavior"] == 'greplog'
-						}
+							if $脚本参数hash表["--behavior"]=='chpasswd'
+								新密码=生成随机密码
+								$命令类型='cmd'
+								$命令信息="echo #{新密码}|passwd --stdin #{主机行.username}"
+								
+								远端执行命令(主机ip,用户名,密码,端口,@输出对象.生成一个队列) if $脚本参数hash表["--behavior"] == "chpasswd"
+								主机行.password=新密码
+								主机行.save
+							else
+								远端执行命令(主机ip,用户名,密码,端口,@输出对象.生成一个队列) if $脚本参数hash表["--behavior"] == "x"
+							end
+
+							
+							}
 			线程数组_计数 += 1;
-			
+
 			if    线程并发_轮次计数 <= 线程并发_轮次最大 && 线程数组_计数 == 线程并发_总数
+					进度条2.更新
+					#进度条.increment!
 					线程数组.each {|x|	x.join } && 线程数组_计数=0;
 					线程并发_轮次计数 += 1;
 			elsif 线程并发_轮次计数 == 线程并发_轮次最大 && 线程数组_计数 == 线程并发_最末轮次_计数
+					#进度条.increment!
+					进度条2.更新
 					线程数组.each {|x|	x.join } && 线程数组_计数=0;
 					线程并发_轮次计数 += 1;
+			else
+				#进度条.increment!
+				进度条2.更新
 			end
-
-			进度条.increment!
+			
+			#进度条.increment!
 		}
-
 		@输出对象.读取_所有_队列(@配置文件["config"]["sshlog"])
 		@输出对象.清空队列
 	end
@@ -399,10 +388,11 @@ end
 
 
 
-
-
 (C_自动化操作.new.查询主机信息 if $脚本参数hash表["--behavior"]=='info') && exit;
-(C_自动化操作.new.测试主机链接 if $脚本参数hash表["--behavior"]=='cs')  && exit;
+(C_自动化操作.new.测试主机链接($脚本参数hash表["--host"]) if $脚本参数hash表["--behavior"]=='cs')  && exit;
+
+(C_自动化操作.new.修改密码 if $脚本参数hash表["--behavior"] == "chpasswd")  && exit;
+
 
 
 C_自动化操作.new.并发执行 if $脚本参数hash表["--behavior"]=='x'
@@ -423,79 +413,13 @@ if $脚本参数hash表["--behavior"]=='console'
 		$脚本参数hash表["--behavior"] = "x"
 		$实例.并发执行
 	end
+
+	def help
+		puts "可用的命令："
+		puts "show cs x "
+	end
 	C_控制台.new.开启
 end 
-
-=begin
-def 正则分析日志(主机ip参数,用户名参数,密码参数,端口参数,输出队列参数,日志文件,grep过滤,正则表达式参数)
-	
-	begin
-		cmd="#{主机ip参数} " + "#{日志文件} " + "#{grep过滤} " + "#{正则表达式参数}"
-		`
-			echo "#{cmd}"  >> /var/log/doauto.cmd.log;
-
-		`
-		Net::SSH.start(主机ip参数,用户名参数,:port => 端口参数 , :password => 密码参数) do |ssh|
-			  日志输出 = ssh.exec!("grep \"#{grep过滤}\" #{日志文件}") if grep过滤 != ''
-			  日志输出 = ssh.exec!("cat #{日志文件}") if grep过滤 == ''
-			  
-			  日志行数 = 0;日志输出.each_line {|x|  日志行数 += 1 }
-			  进度条 = ProgressBar.new(日志行数);
-
-			  日志输出.each_line {|行|
-			  	  if Regexp.new(正则表达式参数).match(行)
-			  	  	输出队列参数 <<	"@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + Regexp.new(正则表达式参数).match(行).to_s 
-			  	  end
-			  	  进度条.increment!
-			  }
-		end
-	rescue  => 错误信息 #因为是并发的连接，可能会获取多行错误信息
-		puts "#{错误信息}"
-	ensure
-		#exit 102
-	end
-end
-=end 
-
-
-
-=begin
-def 远端传输文件(主机ip参数,用户名参数,密码参数,端口参数,输出队列参数,本地文件参数,远程文件参数,动作)
-	begin 
-		当前时间=Time.new.to_s.byteslice(0,19)
-		输出队列参数 << "#{当前时间} #{主机ip参数} 开始连接"
-
-	 	Net::SCP.start(主机ip参数,用户名参数,:port => 端口参数 ,:password => 密码参数) do |scp|
-			if 动作 == "上载"
-				# 并发上载
-				上载通道数组=Array.new
-				上载通道数组[0]=scp.upload(本地文件参数,远程文件参数)
-				上载通道数组.each { |通道|
-				通道.wait
-			  	}
-	 		elsif 动作 == "下载"
-				# 并发下载
-				下载通道数组=Array.new
-				下载通道数组[0]=scp.download(远程文件参数,本地文件参数)
-				下载通道数组.each { |通道|
-				通道.wait 
-			  	}
-			else
-			  puts "scp的行为未知"
-			end
-		end
-		当前时间=Time.new.to_s.byteslice(0,19)
-		输出队列参数 << "#{当前时间} #{主机ip参数} 完成操作"
-	rescue  => 错误信息
-		puts "#{错误信息}"
-	ensure
-		#exit 103
-	end	
-end
-=end
-
-
-
 
 #来捕捉Ctrl-C
 rescue Interrupt
