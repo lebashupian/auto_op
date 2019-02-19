@@ -9,12 +9,13 @@ require "wxl_process_bar"
 ################
 # 命令提示符判断
 # 先判断是否有参数
-M_基础方法.退出信息("没有指定参数,你可以先使用--help查看一下帮助内容") if ARGV[0] == nil
-
-# 判断是否是需要help
-(M_常量::CONS_帮助信息.each_line {|x| puts x};exit 2;) if ARGV.include? "--help"
+# # 判断是否是需要help
+(M_常量::CONS_帮助信息.each_line {|x| puts x};exit 2;) if ARGV[0] == nil or ARGV.include? "--help"
 
 
+
+
+(M_常量::CONS_FAQ.each_line {|x| puts x};exit 2;) if ARGV.include? "--faq"
 
 
 
@@ -27,6 +28,8 @@ $脚本参数hash表={}
 ARGV.each {|x|
   $脚本参数hash表.merge!({"#{x.split("=")[0]}" => "#{x.split("=")[1]}"});
 }
+
+
 
 
 # 判断是否给与了cmd命令参数，以及参数的子参数是否正确
@@ -63,10 +66,17 @@ end
 
 p $脚本参数hash表 if 参数有? "--debug"
 
+#
+# 让命令行支持 -B选项
+#
+if 有? "-B"
+	$脚本参数hash表["--behavior"]=$脚本参数hash表["-B"]
+end 
+
 M_基础方法.退出信息("你需要指定--behavior参数") if 没有? "--behavior"
 
-if 有? "--behavior" and !(a在b其中? $脚本参数hash表["--behavior"],'x cs info dbinit console chpasswd')
-	M_基础方法.退出信息("--behavior参数的可选值有 x scp cs info greplog dbinit") 
+if 有? "--behavior" and !(a在b其中? $脚本参数hash表["--behavior"],'x test info dbinit console chpasswd checkenv')
+	M_基础方法.退出信息("--behavior参数的可选值有 x test info greplog dbinit") 
 end
 
 if 等于? "--behavior","x" and ( ( 没有? "--script" and 没有? "--cmd" ) or ( 有? "--script" and 没有值? "--script" ) or ( 有? "--cmd" and 没有值? "--cmd" ) ) 
@@ -317,6 +327,66 @@ class C_自动化操作
 		}
 	end
 
+	def 检查环境
+		if a在b其中? RUBY_PLATFORM,'x86_64-linux'
+			puts "运行平台：#{RUBY_PLATFORM} 通过"
+		else
+			puts "运行平台：#{RUBY_PLATFORM} 不通过"
+			exit
+		end
+
+		版本数组=RUBY_VERSION.split('.')
+		版本数组.pop
+		版本=版本数组.join('.')
+		if a在b其中? 版本,'2.3 2.4 2.5'
+			puts "版本号：#{RUBY_VERSION} 通过"
+		else
+			puts "版本号：#{RUBY_VERSION} 不通过"
+			exit
+		end		
+		
+		gem列表=`gem list`
+		gem列表.each_line {|x| 
+			数组=x.chomp.delete(',').delete('(').delete(')').split(" ")
+			gem名称=数组[0]
+			gem最高版本号码=数组[1]
+
+			if 	  gem名称 == 'activerecord'
+				if M_基础方法.版本模式匹配(gem最高版本号码,/5\.2\.\d/)
+					puts "#{gem名称} 检测通过"
+				else
+					puts "#{gem名称} #{gem最高版本号码}检测不通过，请使用gem安装5.2.x版本"
+				end
+			elsif gem名称 == 'net-ssh'
+				if M_基础方法.版本模式匹配(gem最高版本号码,/4\.2\.\d/)
+					puts "#{gem名称} 检测通过"
+				else
+					puts "#{gem名称} #{gem最高版本号码}检测不通过，请使用gem安装4.2.x版本"
+				end
+			elsif gem名称 == 'progress_bar'
+				if M_基础方法.版本模式匹配(gem最高版本号码,/1\.2\.\d/)
+					puts "#{gem名称} 检测通过"
+				else
+					puts "#{gem名称} #{gem最高版本号码}检测不通过，请使用gem安装1.2.x版本"
+				end
+			elsif gem名称 == 'curses'
+				if M_基础方法.版本模式匹配(gem最高版本号码,/1\.2\.\d/)
+					puts "#{gem名称} 检测通过"
+				else
+					puts "#{gem名称} #{gem最高版本号码}检测不通过，请使用gem安装1.2.x版本"
+				end
+			elsif gem名称 == 'wxl_console'
+				if M_基础方法.版本模式匹配(gem最高版本号码,/0\.1\.\d/)
+					puts "#{gem名称} 检测通过"
+				else
+					puts "#{gem名称} #{gem最高版本号码}检测不通过，请使用gem安装0.1.x版本"
+				end
+			else
+				nil
+			end
+		}
+		
+	end
 
 	def 并发执行
 		################
@@ -386,10 +456,9 @@ class C_自动化操作
 	end
 end
 
-
-
+(C_自动化操作.new.检查环境 if $脚本参数hash表["--behavior"]=='checkenv') && exit;
 (C_自动化操作.new.查询主机信息 if $脚本参数hash表["--behavior"]=='info') && exit;
-(C_自动化操作.new.测试主机链接($脚本参数hash表["--host"]) if $脚本参数hash表["--behavior"]=='cs')  && exit;
+(C_自动化操作.new.测试主机链接($脚本参数hash表["--host"]) if $脚本参数hash表["--behavior"]=='test')  && exit;
 
 (C_自动化操作.new.修改密码 if $脚本参数hash表["--behavior"] == "chpasswd")  && exit;
 
@@ -402,7 +471,7 @@ if $脚本参数hash表["--behavior"]=='console'
 	def show(主机匹配=nil)
 		$实例.查询主机信息 主机匹配
 	end
-	def cs(主机匹配=nil)
+	def test(主机匹配=nil)
 		$实例.测试主机链接 主机匹配
 	end
 
@@ -416,7 +485,7 @@ if $脚本参数hash表["--behavior"]=='console'
 
 	def help
 		puts "可用的命令："
-		puts "show cs x "
+		puts "show test x "
 	end
 	C_控制台.new.开启
 end 
