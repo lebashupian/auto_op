@@ -4,7 +4,16 @@
 begin  #所有程序都放在一个测试块中，来捕捉Ctrl-C
 
 require_relative "basic_funcion"
-require "wxl_process_bar"
+
+#
+# 这部分异常处理，主要是为了兼容脚本里面调用doauto，因为无法正常输出进度条而导致的报错
+#
+begin
+	require "wxl_process_bar"
+rescue Exception => e
+	nil
+end
+
 
 ################
 # 命令提示符判断
@@ -408,7 +417,17 @@ class C_自动化操作
 		#p 线程并发_总数
 		#p 线程并发_最末轮次_计数
 		进度条 = ProgressBar.new(主机信息.count);
-		进度条2=C_进度条.new 主机信息.count
+
+
+		#
+		# 这部分异常处理，主要是为了兼容脚本里面调用doauto，因为无法正常输出进度条而导致的报错
+		#
+		begin
+			进度条2=C_进度条.new 主机信息.count
+		rescue Exception => e
+			nil
+		end
+		
 
 		#p 主机信息.count
 
@@ -435,18 +454,31 @@ class C_自动化操作
 			线程数组_计数 += 1;
 
 			if    线程并发_轮次计数 <= 线程并发_轮次最大 && 线程数组_计数 == 线程并发_总数
-					进度条2.更新
+					begin
+						进度条2.更新
+					rescue Exception => e
+						nil
+					end
+					
 					#进度条.increment!
 					线程数组.each {|x|	x.join } && 线程数组_计数=0;
 					线程并发_轮次计数 += 1;
 			elsif 线程并发_轮次计数 == 线程并发_轮次最大 && 线程数组_计数 == 线程并发_最末轮次_计数
 					#进度条.increment!
-					进度条2.更新
+					begin
+						进度条2.更新
+					rescue Exception => e
+						nil
+					end
 					线程数组.each {|x|	x.join } && 线程数组_计数=0;
 					线程并发_轮次计数 += 1;
 			else
-				#进度条.increment!
-				进度条2.更新
+					#进度条.increment!
+					begin
+						进度条2.更新
+					rescue Exception => e
+						nil
+					end
 			end
 			
 			#进度条.increment!
