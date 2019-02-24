@@ -84,8 +84,8 @@ end
 
 M_基础方法.退出信息("你需要指定--behavior参数") if 没有? "--behavior"
 
-if 有? "--behavior" and !(a在b其中? $脚本参数hash表["--behavior"],'x test info dbinit console chpasswd checkenv')
-	M_基础方法.退出信息("--behavior参数的可选值有 x test info greplog dbinit") 
+if 有? "--behavior" and !(a在b其中? $脚本参数hash表["--behavior"],'x test info dbinit console chpasswd checkenv ')
+	M_基础方法.退出信息("--behavior参数的可选值有 x test info dbinit console chpasswd checkenv ") 
 end
 
 if 等于? "--behavior","x" and ( ( 没有? "--script" and 没有? "--cmd" ) or ( 有? "--script" and 没有值? "--script" ) or ( 有? "--cmd" and 没有值? "--cmd" ) ) 
@@ -272,21 +272,27 @@ class C_自动化操作
 					运行记录.save
 
 					if $命令类型 == 'cmd'
-				  		输出命令 = ssh.exec!($命令信息)
+						if $脚本参数hash表["--dryrun"] == "on"
+							输出命令 = '执行流程测试'
+						else
+							输出命令 = ssh.exec!($命令信息)
+						end
+				  		
 					elsif $命令类型 == 'script'
 
 						M_基础方法.退出信息("#{$命令信息}脚本文件不存在") if !File.file?($命令信息)
 						脚本文件=File.open($命令信息,"r");
 						代码块=脚本文件.read
 						脚本文件.close
-						输出命令 = ssh.exec!(代码块)
-						#脚本文件行数 = 0;脚本文件.each_line {|x|  脚本文件行数 += 1 };脚本文件.rewind
-						#脚本文件.each_line {|行|
-						#	输出命令 ||= ''
-						#	输出命令 << ssh.exec!("#{行}")
-						#}
+						
+						if $脚本参数hash表["--dryrun"] == "on"
+							输出命令 = '执行流程测试'
+						else
+							输出命令 = ssh.exec!(代码块)
+						end
 						
 					else
+						p $命令类型
 						M_基础方法.退出信息("无效的命令类型,请检查你的参数")
 					end
 
@@ -446,7 +452,10 @@ class C_自动化操作
 								主机行.password=新密码
 								主机行.save
 							else
-								远端执行命令(主机ip,用户名,密码,端口,@输出对象.生成一个队列) if $脚本参数hash表["--behavior"] == "x"
+								
+								if $脚本参数hash表["--behavior"] == "x"
+									远端执行命令(主机ip,用户名,密码,端口,@输出对象.生成一个队列) 
+								end
 							end
 
 							

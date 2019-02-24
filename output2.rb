@@ -1,6 +1,6 @@
 #!/opt/ruby_2.2.3/bin/ruby
 # coding: utf-8
-
+require_relative "color"
 class Output
 	def initialize
 		@队列数组=Array.new
@@ -24,10 +24,16 @@ class Output
 		输出文件=File.new("/var/log/auto_op/ssh.log.#{当前时间}","w+") if local_log == true ;
 		i=1
 		@队列数组.each {|队列|
-			puts "       ------------输出通道:#{i},信息输出:-----------       "
+			puts 多色显示("输出通道:#{i},信息输出:".center(100,"-"),"黄色","","")
 			队列.size.times {|读取次数|
 				条目=队列.pop
-				puts "行#{'%06d' % 读取次数} #{条目}"
+				条目中主机部分=条目.split('->',2)[0] 
+				条目中命令部分=条目.split('->',2)[1]  
+				print 多色显示("行#{'%06d' % 读取次数}","黄色","","")
+				print 多色显示("#{条目中主机部分}","青色","","")
+				print 多色显示("#{条目中命令部分}","绿色","","")
+				print "\n"
+				#puts "行#{'%06d' % 读取次数} #{条目}"
 				输出文件.syswrite("#{条目}\n") if local_log == true ;
 			}
 			i += 1;
