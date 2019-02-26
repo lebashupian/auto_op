@@ -1,8 +1,8 @@
 # auto_op
-批量执行命令的工具.
+批量远端主机执行命令的工具.
 这个是对net/ssh库的再次封装。底层依赖是net/ssh库。
 
-它可以做到，批量通过ssh通道向大量的服务器发送shell命令。
+它可以做到，批量通过ssh通道向大量的服务器发送shell命令（也可以是一个脚本）
 
 它使用mysql来记录主机信息和运行信息。
 
@@ -30,3 +30,25 @@ doauto --help
 		doauto.rb --behavior=chpasswd --host=xxx
 		doauto.rb --behavior=console
 		doauto.rb -B=checkenv
+
+
+hostadd.rb 
+		这是一个导入主机信息到mysql数据库的脚本。里面有一个现成的例子
+		通常，你应该匹配部署一批主机，主机的IP，最好是确定好的和连续的。密码是统一的。
+		你可以修改这个脚本。匹配一次性导入到数据库中。
+		然后通过doauto --behavior=chpasswd --host=xxx 来匹配的重置密码为随机字符
+
+
+task_manager 是一个部署任务的管理器，底层使用的是ruby的rake，同时它调用了doauto这个脚本程序。
+			需要部署的任务，你需要定义在 task_manager.conf 中，如果你有python的编程经验，你应该可以很好的理解定义文件的例子
+			以下是一个命令行的演示
+
+			[root@ruby auto_op]# task_manager
+			->show;
+			1) mysql部署相关:一键安装nginx和软件依赖
+			2) mysql部署相关:安装nginx
+			3) mysql部署相关:安装pcre
+			->1;
+			->start 1;
+			mysql部署相关:一键安装nginx和软件依赖
+			#######安装pcre######
