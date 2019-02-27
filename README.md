@@ -1,4 +1,4 @@
-# auto_op
+#auto_op
 批量远端主机执行命令的工具.
 这个是对net/ssh库的再次封装。底层依赖是net/ssh库。
 
