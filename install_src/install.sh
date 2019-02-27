@@ -9,6 +9,7 @@
 	yum -y install mysql
 	yum -y install mysql-devel
 	yum -y install wget
+	service mysqld start
 	echo 编译安装ruby
 	wget https://cache.ruby-lang.org/pub/ruby/2.5/ruby-2.5.3.tar.gz
 	tar -zxvf ruby-2.5.3.tar.gz
