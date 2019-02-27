@@ -147,9 +147,6 @@ class C_运行表 < ActiveRecord::Base
 	self.primary_key = 'id'
 end
 
-C_数据库连接.connection.execute("delete from run_log;")
-C_数据库连接.connection.execute("commit;")
-
 
 
 ################
@@ -197,6 +194,9 @@ def 初始化数据库结构
 end
 初始化数据库结构 if $脚本参数hash表["--behavior"]=='dbinit'
 
+
+C_数据库连接.connection.execute("delete from run_log;")
+C_数据库连接.connection.execute("commit;")
 
 
 

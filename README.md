@@ -73,6 +73,7 @@ task_manager 是一个部署任务的管理器，底层使用的是ruby的rake�
 	yum -y install gdbm-devel
 	yum -y install mysql-server
 	yum -y install mysql
+	yum -y install mysql-devel
 
 
 2，安装ruby
