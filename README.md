@@ -1,4 +1,5 @@
 # auto_op
+<<<<<<< HEAD
 批量远端主机执行命令的工具.
 这个是对net/ssh库的再次封装。底层依赖是net/ssh库。
 
@@ -91,4 +92,7 @@ source /etc/profile
 
 gem sources --remove https://rubygems.org/
 gem sources --add https://gems.ruby-china.com
+=======
+自动化运维工具，用于批量发布命令到远端主机。
+>>>>>>> 05db34b9fce26d6cb47b11e0006d207d1c189298
 
