@@ -33,4 +33,4 @@ source /etc/profile
 	echo "使用bundle安装gem依赖库"
 	bundle install
 
-	echo "完成"
+	echo "完成,请重新登录shell，加载环境变量"
