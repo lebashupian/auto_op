@@ -17,6 +17,27 @@ end
 
 
 #
+# demo，添加本地主机为远程主机。主要用于基本测试
+#
+
+20.times {|x|
+	x += 1
+	ip='127.0.0.' + x.to_s
+        主机表=C_主机表.new
+        主机表.ip=ip
+        主机表.username='ceshi'
+        主机表.password='1234'
+        主机表.port=22
+        主机表.grp='.all.test'
+        主机表.used='Y'
+        主机表.save
+}
+
+
+exit
+
+
+#
 # 范例1，批量添加连续ip主机到数据库
 #
 
