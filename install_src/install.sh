@@ -10,6 +10,7 @@
 	yum -y install mysql-devel
 	yum -y install wget
 	service mysqld start
+	mysql -e "create database auto_op2"
 	echo 编译安装ruby
 	wget https://cache.ruby-lang.org/pub/ruby/2.5/ruby-2.5.3.tar.gz
 	tar -zxvf ruby-2.5.3.tar.gz
