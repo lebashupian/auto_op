@@ -2,6 +2,14 @@
 批量远端主机执行命令的工具.
 这个是对net/ssh库的再次封装。底层依赖是net/ssh库。
 
+它重点解决了三个问题
+第一，它解决并发执行的问题，
+第二，它封装了ruby的ssh库，提供了更好用的方法
+第三，它提供了很好的进度显示，和执行界面的回显。
+第四，它提供了人性化的功能，比如一键批量修改主机密码。
+
+它提供的命令入口，没有屏蔽shell的语法。因为我个人觉得，对于工程师而言，封装shell是画蛇添足的做法，那会提高学习成本，浪费时间。就像你给中国人封装汉语一样，没有必要。你以前怎么写shell脚本或命令，你在auto_op中还怎么写，不会有任何变化。
+
 它可以做到，批量通过ssh通道向大量的服务器发送shell命令（也可以是一个脚本）
 
 它使用mysql来记录主机信息和运行信息。
@@ -53,3 +61,30 @@ task_manager 是一个部署任务的管理器，底层使用的是ruby的rake�
 			mysql部署相关:一键安装nginx和软件依赖
 			#######安装pcre######
 			....略
+
+
+从零开始
+1，你首先要有一个centos的环境，比如centos 6.10
+	你需要安装如下rpm包
+	yum -y groupinstall "Development tools"
+	yum -y install readline-devel
+	yum -y install lrzsz
+	yum -y install openssl-devel
+
+
+2，安装ruby
+	建议版本。2.5.x，这里演示的版本是2.5.3
+	tar -zxvf ruby-2.5.3.tar.gz
+	cd ruby-2.5.3
+	mkdir /opt/ruby2.5.3
+	./configure --prefix=/opt/ruby2.5.3/
+	make && make install
+
+cat <<EOF>> /etc/profile
+export PATH=/opt/ruby2.5.3/bin:$PATH
+EOF
+source /etc/profile
+
+gem sources --remove https://rubygems.org/
+gem sources --add https://gems.ruby-china.com
+
