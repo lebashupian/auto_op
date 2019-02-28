@@ -47,6 +47,8 @@ module M_常量
 		--behavior=console      使用交互模式
 			x 'ls','.all'   交互模式下使用执行命令
 		--behavior=checkenv 检查运行环境（命令会检查ruby版本、和gem第三方库的版本是否符合要求）
+		--behavior=push 推送文件到远端（支持目录推送）
+		--behavior=pull 拉取文件到本地（不支持目录推送）
 
 	注意：如果程序的输出太长，超过终端缓存行数，可以通过/tmp/下的'ssh.log.日期' 来查看日志
 		用例
@@ -74,6 +76,7 @@ require 'active_record'
 #http://net-ssh.github.io/net-scp/
 require 'net/ssh'
 #require 'net/scp'
+require 'net/sftp'
 require 'progress_bar'
 require_relative 'output2'
 require 'yaml'

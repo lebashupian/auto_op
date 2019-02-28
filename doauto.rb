@@ -84,7 +84,7 @@ end
 
 M_基础方法.退出信息("你需要指定--behavior参数") if 没有? "--behavior"
 
-if 有? "--behavior" and !(a在b其中? $脚本参数hash表["--behavior"],'x test info dbinit console chpasswd checkenv ')
+if 有? "--behavior" and !(a在b其中? $脚本参数hash表["--behavior"],'x test info dbinit console chpasswd checkenv push pull')
 	M_基础方法.退出信息("--behavior参数的可选值有 x test info dbinit console chpasswd checkenv ") 
 end
 
@@ -105,6 +105,8 @@ if $脚本参数hash表["--behavior"]=='x' and $脚本参数hash表.has_key?("--
 elsif $脚本参数hash表["--behavior"]=='x' and $脚本参数hash表.has_key?("--script")
 	$命令信息,$命令类型=$脚本参数hash表["--script"],"script"
 end
+
+
 
 
 #####################################################################################################
@@ -206,6 +208,12 @@ class C_自动化操作
 		@主机grep =$脚本参数hash表["--host"]
 		@配置文件=$配置文件
 		@输出对象=Output.new
+		if $脚本参数hash表["--local"] != nil
+			@本地路径 = $脚本参数hash表["--local"]
+		end
+		if $脚本参数hash表["--remote"] != nil
+			@远程路径 = $脚本参数hash表["--remote"]
+		end
 	end
 
 	def 查询主机信息(主机匹配=nil)
@@ -259,6 +267,32 @@ class C_自动化操作
 		}
 		@输出对象.读取_所有_队列(@配置文件["config"]["sshlog"])
 		@输出对象.清空队列
+	end
+
+
+	def 推送文件到远端(主机ip参数,用户名参数,密码参数,端口参数,本地路径参数,远程路径参数,输出队列参数)
+		Net::SFTP.start(主机ip参数, 用户名参数, :password => 密码参数,:port => 端口参数) do |sftp|
+			begin
+				sftp.upload! 本地路径参数 , 远程路径参数
+				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + "上载完成"
+			rescue Exception => e
+				#puts e.message
+				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + e.message
+			end
+			
+		end
+	end
+
+	def 拉取文件到本地(主机ip参数,用户名参数,密码参数,端口参数,本地路径参数,远程路径参数,输出队列参数)
+		Net::SFTP.start(主机ip参数, 用户名参数, :password => 密码参数,:port => 端口参数) do |sftp|
+			begin
+				sftp.download! 远程路径参数 , 本地路径参数 + '/' + 主机ip参数 + 用户名参数 + 端口参数.to_s
+				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + "下载完成"
+			rescue Exception => e
+				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + e.message
+			end
+			
+		end		
 	end
 
 	def 远端执行命令(主机ip参数,用户名参数,密码参数,端口参数,输出队列参数)
@@ -451,11 +485,14 @@ class C_自动化操作
 								远端执行命令(主机ip,用户名,密码,端口,@输出对象.生成一个队列) if $脚本参数hash表["--behavior"] == "chpasswd"
 								主机行.password=新密码
 								主机行.save
+							elsif $脚本参数hash表["--behavior"] == "x"
+								远端执行命令(主机ip,用户名,密码,端口,@输出对象.生成一个队列) 
+							elsif $脚本参数hash表["--behavior"] == "push"
+								推送文件到远端(主机ip,用户名,密码,端口,@本地路径,@远程路径,@输出对象.生成一个队列)
+							elsif $脚本参数hash表["--behavior"] == "pull"
+								拉取文件到本地(主机ip,用户名,密码,端口,@本地路径,@远程路径,@输出对象.生成一个队列)
 							else
-								
-								if $脚本参数hash表["--behavior"] == "x"
-									远端执行命令(主机ip,用户名,密码,端口,@输出对象.生成一个队列) 
-								end
+								nil
 							end
 
 							
@@ -505,7 +542,8 @@ end
 
 
 
-C_自动化操作.new.并发执行 if $脚本参数hash表["--behavior"]=='x'
+C_自动化操作.new.并发执行 if a在b其中? $脚本参数hash表["--behavior"],'x push pull'
+
 
 if $脚本参数hash表["--behavior"]=='console'
 	$实例=C_自动化操作.new

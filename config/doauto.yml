@@ -7,7 +7,7 @@ config:
   # 在ruby的yaml库中，on 和 true 同义，off 和 false 同义
   sshlog: on
   # 批量执行命令的并发量
-  thread_concurrency: 2
+  thread_concurrency: 20
 database:
   db_host: "127.0.0.1"
   db_user: "root"
