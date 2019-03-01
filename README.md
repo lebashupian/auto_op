@@ -1,4 +1,4 @@
-#auto_op
+auto_op
 批量远端主机执行命令的工具.
 这个是对net/ssh库的再次封装。底层依赖是net/ssh库。
 
@@ -8,7 +8,7 @@
 第三，它提供了很好的进度显示，和执行界面的回显。
 第四，它提供了人性化的功能，比如一键批量修改主机密码。
 
-它提供的命令入口，没有屏蔽shell的语法。因为我个人觉得，对于工程师而言，封装shell是画蛇添足的做法，那会提高学习成本，浪费时间。就像你给中国人封装汉语一样，没有必要。你以前怎么写shell脚本或命令，你在auto_op中还怎么写，不会有任何变化。
+它提供的命令入口，没有屏蔽shell的语法。所以，你几乎不花费学习成本，你就可以像平常一样，在远程主机上执行命令。你以前怎么写shell脚本或命令，你在auto_op中还怎么写，不会有任何变化。
 
 它可以做到，批量通过ssh通道向大量的服务器发送shell命令（也可以是一个脚本）
 
@@ -18,20 +18,20 @@
 doauto --help
 请携带命令行参数:
 		--help       显示帮助信息
-		--faq        显示常见问题的解决方式
+		--faq        显示常见问题的解决方式、和一些问题的冗长说明
 		--behavior 和 -B 等价
-		--behavior=test 测试主机链接
-		--behavior=x   远程执行命令
-		--behavior=info       打印所有的主机信息
-		--behavior=dbinit       初始化数据库结构
-		--behavior=chpasswd     自动修改主机账户密码，密码随机生成20位
-		--behavior=console      使用交互模式
+		--behavior=test 测试主机链接，有时候提前测试一下到远程主机的连接是否正常还是非常有必要的。
+		--behavior=x   远程执行命令，他支持两种命令类型，一种是单纯的命令或组合命令（--cmd），一种是通过一个脚本文件给与命令集合（--script）。
+		--behavior=info       打印主机信息，当时通过--host来指定主机集合的时候，提前通过命令看下主机信息比如IP，也许是一个好习惯
+		--behavior=dbinit       初始化数据库结构，当地第一次使用这个工具的时候，你需要编辑config目录下的配置文件，然后指定连接的数据库，然后初始化它。
+		--behavior=chpasswd     自动修改主机账户密码，随机生成20位由大小写字母和数字组成的密码
+		--behavior=console      使用交互模式。目前它支持behavior=x的情景
 			x 'ls','.all'   交互模式下使用执行命令
 		--behavior=checkenv 检查运行环境（命令会检查ruby版本、和gem第三方库的版本是否符合要求）
 
 	注意：如果程序的输出太长，超过终端缓存行数，可以通过/tmp/下的'ssh.log.日期' 来查看日志
 		用例
-		doauto.rb --behavior=test 
+		doauto.rb --behavior=test --host=.all.web.py
 		doauto.rb --behavior=dbinit
 		doauto.rb --behavior=x --cmd=xxx --host=xxx
 		doauto.rb --behavior=x --script=xxx --host=xxx
@@ -64,31 +64,7 @@ task_manager 是一个部署任务的管理器，底层使用的是ruby的rake�
 
 
 从零开始
-1，你首先要有一个centos的环境，比如centos 6.10
-	你需要安装如下rpm包
-	yum -y groupinstall "Development tools"
-	yum -y install readline-devel
-	yum -y install lrzsz
-	yum -y install openssl-devel
-	yum -y install gdbm-devel
-	yum -y install mysql-server
-	yum -y install mysql
-	yum -y install mysql-devel
-
-
-2，安装ruby
-	建议版本。2.5.x，这里演示的版本是2.5.3
-	tar -zxvf ruby-2.5.3.tar.gz
-	cd ruby-2.5.3
-	mkdir /opt/ruby2.5.3
-	./configure --prefix=/opt/ruby2.5.3/
-	make && make install
-
-cat <<EOF>> /etc/profile
-export PATH=/opt/ruby2.5.3/bin:$PATH
-EOF
-source /etc/profile
-
-gem sources --remove https://rubygems.org/
-gem sources --add https://gems.ruby-china.com
+1，克隆仓库
+git clone https://github.com/lebashupian/auto_op.git
+2，sh auto_op/install_src/install.sh #该文件会自动帮你完成依赖包和依赖库的安装，并会自动编译ruby到/opt目录下，还会自动帮你安装一个mysql数据库
 
