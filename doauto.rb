@@ -430,6 +430,12 @@ class C_自动化操作
 				else
 					puts "#{gem名称} #{gem最高版本号码}检测不通过，请使用gem安装0.1.x版本"
 				end
+			elsif gem名称 == 'net-sftp'
+                                if M_基础方法.版本模式匹配(gem最高版本号码,/2\.1\.\d/)
+                                        puts "#{gem名称} 检测通过"
+                                else
+                                        puts "#{gem名称} #{gem最高版本号码}检测不通过，请使用gem安装2.1.x版本"
+                                end
 			else
 				nil
 			end
