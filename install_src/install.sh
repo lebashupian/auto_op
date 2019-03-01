@@ -8,8 +8,11 @@
 	yum -y install mysql-server
 	yum -y install mysql
 	yum -y install mysql-devel
-
+	yum -y install wget
+	service mysqld start
+	mysql -e "create database auto_op2"
 	echo 编译安装ruby
+	wget https://cache.ruby-lang.org/pub/ruby/2.5/ruby-2.5.3.tar.gz
 	tar -zxvf ruby-2.5.3.tar.gz
 	cd ruby-2.5.3
 	mkdir /opt/ruby2.5.3
@@ -32,4 +35,4 @@ source /etc/profile
 	echo "使用bundle安装gem依赖库"
 	bundle install
 
-	echo "完成"
+	echo "完成,请重新登录shell，加载环境变量"
