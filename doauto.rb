@@ -310,6 +310,8 @@ class C_自动化操作
 							输出命令 = '执行流程测试'
 						else
 							输出命令 = ssh.exec!($命令信息)
+							ssh.exec!($命令信息)
+							p $?.class
 						end
 				  		
 					elsif $命令类型 == 'script'
@@ -323,6 +325,7 @@ class C_自动化操作
 							输出命令 = '执行流程测试'
 						else
 							输出命令 = ssh.exec!(代码块)
+							p $?.exitstatus
 						end
 						
 					else
@@ -331,7 +334,7 @@ class C_自动化操作
 					end
 
 				  	输出命令.each_line {|行|
-				  		输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + 行
+				  		输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + 行.strip
 				  	}
 				  	#sleep 1
 
@@ -340,7 +343,7 @@ class C_自动化操作
 					运行记录.save		
 			end
 		rescue  => 错误信息 #因为是并发的连接，可能会获取多行错误信息
-			puts "#{错误信息}"
+					输出队列参数 << "@主机" + " #{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " +"#{错误信息}"
 		ensure
 			#exit 102
 		end

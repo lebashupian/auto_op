@@ -47,7 +47,7 @@ hostadd.rb
 		然后通过doauto --behavior=chpasswd --host=xxx 来重置匹配主机的密码为随机字符
 
 
-task_manager 是一个部署任务的管理器，底层使用的是ruby的rake，同时它调用了doauto这个脚本程序。
+task_manager 是一个大型任务的编排工具，底层使用的是ruby的rake，同时它调用了doauto这个脚本程序。
 			需要部署的任务，你需要定义在 task_manager.conf 中，如果你有python的编程经验，你应该可以很好的理解定义文件的例子
 			以下是一个命令行的演示
 
