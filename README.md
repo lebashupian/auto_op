@@ -28,7 +28,7 @@ doauto --help
 		--behavior=console      使用交互模式。目前它支持behavior=x的情景
 			x 'ls','.all'   交互模式下使用执行命令
 		--behavior=checkenv 检查运行环境（命令会检查ruby版本、和gem第三方库的版本是否符合要求）
-
+		--dryrun=on 这个命令尤其适用于task_manager中，它表示，仅仅模拟执行流程，而不是真的在远程执行命令。一般在配置完成task_manager.conf之后，需要测试执行流程的时候使用
 	注意：如果程序的输出太长，超过终端缓存行数，可以通过/tmp/下的'ssh.log.日期' 来查看日志
 		用例
 		doauto.rb --behavior=test --host=.all.web.py
@@ -44,7 +44,7 @@ hostadd.rb
 		这是一个导入主机信息到mysql数据库的脚本。里面有一个现成的例子
 		通常，你应该匹配部署一批主机，主机的IP，最好是确定好的和连续的。密码是统一的。
 		你可以修改这个脚本。匹配一次性导入到数据库中。
-		然后通过doauto --behavior=chpasswd --host=xxx 来匹配的重置密码为随机字符
+		然后通过doauto --behavior=chpasswd --host=xxx 来重置匹配主机的密码为随机字符
 
 
 task_manager 是一个部署任务的管理器，底层使用的是ruby的rake，同时它调用了doauto这个脚本程序。
@@ -67,4 +67,6 @@ task_manager 是一个部署任务的管理器，底层使用的是ruby的rake�
 1，克隆仓库
 git clone https://github.com/lebashupian/auto_op.git
 2，sh auto_op/install_src/install.sh #该文件会自动帮你完成依赖包和依赖库的安装，并会自动编译ruby到/opt目录下，还会自动帮你安装一个mysql数据库
-
+3，你需要参考hostadd.rb中的例子，添加主机信息到数据库。
+4，然后你可以开始参考doauto的help信息来操作远程主机了
+5，如果你需要定义很多的执行任务，并且定义执行任务之间的先后依赖关系，你需要参考task_manager.conf文件，修改里面的配置。然后通过task_manager命令来发动任务执行
