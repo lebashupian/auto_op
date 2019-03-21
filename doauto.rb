@@ -573,6 +573,42 @@ if $脚本参数hash表["--behavior"]=='console'
 		puts "可用的命令："
 		puts "show test x "
 	end
+
+require "readline"
+require "gdbm"  #支持中文
+require 'socket'
+
+
+
+class C_控制台
+	
+	def initialize(外部绑定=TOPLEVEL_BINDING)
+		@命令段落=""
+		@命令行提示符="->"
+	end
+
+	def 开启
+		while 读取行 = Readline.readline(@命令行提示符, true)
+			exit if 读取行=='exit' || 读取行=='quit' || 读取行=='exit;' || 读取行=='quit;';
+			if ! 读取行.end_with? ";"
+				@命令段落 << 读取行 + "\n"
+				@命令行提示符=""
+			else
+				@命令段落 << 读取行
+				@命令段落.delete_suffix!(';')
+				
+				#puts __FILE__
+				#p $脚本参数hash表
+				shell=%Q{#{__FILE__} -B=x --host=#{$脚本参数hash表['--host']} --cmd="#{@命令段落}"}
+				#p shell
+				system "#{shell}"
+				@命令段落=''
+				@命令行提示符="->"
+			end
+		end		
+	end
+end
+
 	C_控制台.new.开启
 end 
 

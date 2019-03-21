@@ -94,4 +94,4 @@ require 'progress_bar'
 require_relative 'output2'
 require 'yaml'
 require "curses"
-require "wxl_console"	
+#require "wxl_console"	
