@@ -310,6 +310,7 @@ class C_自动化操作
 							输出命令 = '执行流程测试'
 						else
 							输出命令 = ssh.exec!($命令信息)
+							ssh.exec!($命令信息)
 						end
 				  		
 					elsif $命令类型 == 'script'
@@ -331,7 +332,7 @@ class C_自动化操作
 					end
 
 				  	输出命令.each_line {|行|
-				  		输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + 行
+				  		输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + 行.strip
 				  	}
 				  	#sleep 1
 
@@ -340,7 +341,7 @@ class C_自动化操作
 					运行记录.save		
 			end
 		rescue  => 错误信息 #因为是并发的连接，可能会获取多行错误信息
-			puts "#{错误信息}"
+					输出队列参数 << "@主机" + " #{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " +"#{错误信息}"
 		ensure
 			#exit 102
 		end
@@ -430,6 +431,12 @@ class C_自动化操作
 				else
 					puts "#{gem名称} #{gem最高版本号码}检测不通过，请使用gem安装0.1.x版本"
 				end
+			elsif gem名称 == 'net-sftp'
+                                if M_基础方法.版本模式匹配(gem最高版本号码,/2\.1\.\d/)
+                                        puts "#{gem名称} 检测通过"
+                                else
+                                        puts "#{gem名称} #{gem最高版本号码}检测不通过，请使用gem安装2.1.x版本"
+                                end
 			else
 				nil
 			end
@@ -566,6 +573,42 @@ if $脚本参数hash表["--behavior"]=='console'
 		puts "可用的命令："
 		puts "show test x "
 	end
+
+require "readline"
+require "gdbm"  #支持中文
+require 'socket'
+
+
+
+class C_控制台
+	
+	def initialize(外部绑定=TOPLEVEL_BINDING)
+		@命令段落=""
+		@命令行提示符="->"
+	end
+
+	def 开启
+		while 读取行 = Readline.readline(@命令行提示符, true)
+			exit if 读取行=='exit' || 读取行=='quit' || 读取行=='exit;' || 读取行=='quit;';
+			if ! 读取行.end_with? ";"
+				@命令段落 << 读取行 + "\n"
+				@命令行提示符=""
+			else
+				@命令段落 << 读取行
+				@命令段落.delete_suffix!(';')
+				
+				#puts __FILE__
+				#p $脚本参数hash表
+				shell=%Q{#{__FILE__} -B=x --host=#{$脚本参数hash表['--host']} --cmd="#{@命令段落}"}
+				#p shell
+				system "#{shell}"
+				@命令段落=''
+				@命令行提示符="->"
+			end
+		end		
+	end
+end
+
 	C_控制台.new.开启
 end 
 

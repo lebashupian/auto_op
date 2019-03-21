@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 # coding: utf-8
-
 require "wxl_console"
 $列表={}
 
@@ -27,10 +26,11 @@ def show
 	}
 end
 
-def start(i)
+def start(i,host=nil)
 	puts  $列表["#{i}"]
 	任务=$列表["#{i}"]
+	host_hash={'task_manage_host' => host}
 	命令="rake #{任务}"
-	system(命令)
+	system(host_hash,命令)
 end
 C_控制台.new.开启

@@ -48,8 +48,8 @@ module M_常量
 			x 'ls','.all'   交互模式下使用执行命令
 		--behavior=checkenv 检查运行环境（命令会检查ruby版本、和gem第三方库的版本是否符合要求）
 		--behavior=push 推送文件到远端（支持目录推送）
-		--behavior=pull 拉取文件到本地（不支持目录推送）
-
+		--behavior=pull 拉取文件到本地（不支持目录拉取）
+		--dryrun=on 不真实执行命令。
 	注意：如果程序的输出太长，超过终端缓存行数，可以通过/tmp/下的'ssh.log.日期' 来查看日志
 		用例
 		doauto.rb --behavior=test 
@@ -59,13 +59,26 @@ module M_常量
 		doauto.rb --behavior=chpasswd --host=xxx
 		doauto.rb --behavior=console
 		doauto.rb -B=checkenv
-
+		doauto.rb -B=push --local=/root/nginx.tar.gz --remote=/root/nginx.tar.gz --host=.all.web.
+                doauto.rb -B=pull --local=/root/message --remote=/var/log/message --host=.all.web #从多个主机拉取数据到本地，本地的文件名会自动附加主机ip信息
 	}
 	#FAQ
 	CONS_FAQ=%Q{
 		FAQ:
 		1,如果，你通过命令远程ssh，发现没有交互登录后所具有的环境变量，报命令找不到的错误。请将/etc/profile 和 ~/.bash_profile 里面配置的环境变量，复制到
 		~/.bashrc中
+		2,--host是如何做映射的到具体的ip的。这里的设计有点类似于域名。如果，你查询主机数据，你会看到以下的数据条目。
+                  | id   | ip              | username | password | port  | grp             | used |
+                  +------+-----------------+----------+----------+-------+-----------------+------+
+                  | 2877 | 192.168.137.41  | root     | xxxxxxx  |    22 | .all.web.py     | Y    |
+                  | 2878 | 192.168.137.42  | root     | xxxxxxx  |    22 | .all.web.py     | Y    |
+                  | 2879 | 192.168.137.43  | root     | xxxxxxx  |    22 | .all.web.php.43 | Y    |
+                  | 2880 | 192.168.137.44  | root     | xxxxxxx  |    22 | .all.web.php.44 | Y    |
+                  | 2881 | 192.168.137.45  | root     | xxxxxxx  |    22 | .all.web.php.45 | Y    |
+		假如，你的--host=.all. 代表你要在所有的主机上执行命令.
+		假如，你的--host=.all.web.php. 代码你是在 43、44、45这三台机器上执行命令
+		所以，它是一个从前往后模糊匹配的方式实现的。
+
 	}
 end
 
@@ -81,4 +94,4 @@ require 'progress_bar'
 require_relative 'output2'
 require 'yaml'
 require "curses"
-require "wxl_console"	
+#require "wxl_console"	
