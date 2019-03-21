@@ -311,7 +311,6 @@ class C_自动化操作
 						else
 							输出命令 = ssh.exec!($命令信息)
 							ssh.exec!($命令信息)
-							p $?.class
 						end
 				  		
 					elsif $命令类型 == 'script'
@@ -325,7 +324,6 @@ class C_自动化操作
 							输出命令 = '执行流程测试'
 						else
 							输出命令 = ssh.exec!(代码块)
-							p $?.exitstatus
 						end
 						
 					else
