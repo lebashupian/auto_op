@@ -88,16 +88,18 @@ task_manager 是一个大型任务的编排工具，底层使用的是ruby的rak
 
 
 	
-	[root@ruby auto_op]# cat <<EOF>> /etc/profile
+	cat <<EOF>> /etc/profile
 	> export PATH=/opt/ruby2.5.3/bin:$PATH
 	> EOF
 
-	[root@ruby auto_op]# source /etc/profile
-gem sources --remove https://rubygems.org/
-gem sources --add https://gems.ruby-china.com
+	source /etc/profile
+	gem sources --remove https://rubygems.org/
+	gem sources --add https://gems.ruby-china.com
 
 1，克隆仓库
-git clone https://github.com/lebashupian/auto_op.git
+
+	git clone https://github.com/lebashupian/auto_op.git
+	
 2，sh auto_op/install_src/install.sh #该文件会自动帮你完成依赖包和依赖库的安装，并会自动编译ruby到/opt目录下，还会自动帮你安装一个mysql数据库
 3，你需要参考hostadd.rb中的例子，添加主机信息到数据库。
 4，然后你可以开始参考doauto的help信息来操作远程主机了
