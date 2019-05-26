@@ -30,6 +30,7 @@ doauto --help
 		--dryrun=on 这个命令尤其适用于task_manager中，它表示，仅仅模拟执行流程，而不是真的在远程执行命令。一般在配置完成task_manager.conf之后，需要测试执行流程的时候使用
 	注意：如果程序的输出太长，超过终端缓存行数，可以通过/tmp/下的'ssh.log.日期' 来查看日志
 		用例
+		
 		doauto.rb --behavior=test --host=.all.web.py
 		doauto.rb --behavior=dbinit
 		doauto.rb --behavior=x --cmd=xxx --host=xxx
