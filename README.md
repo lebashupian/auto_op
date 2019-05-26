@@ -78,22 +78,21 @@ task_manager 是一个大型任务的编排工具，底层使用的是ruby的rak
 
 2，安装ruby
 	建议版本。2.5.x，这里演示的版本是2.5.3
+	
+
 	tar -zxvf ruby-2.5.3.tar.gz
 	cd ruby-2.5.3
 	mkdir /opt/ruby2.5.3
 	./configure --prefix=/opt/ruby2.5.3/
 	make && make install
 
-cat <<EOF>> /etc/profile
-export PATH=/opt/ruby2.5.3/bin:$PATH
-EOF
-source /etc/profile
+
 	
 	[root@ruby auto_op]# cat <<EOF>> /etc/profile
 	> export PATH=/opt/ruby2.5.3/bin:$PATH
 	> EOF
 
-
+	[root@ruby auto_op]# source /etc/profile
 gem sources --remove https://rubygems.org/
 gem sources --add https://gems.ruby-china.com
 
