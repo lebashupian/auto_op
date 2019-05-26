@@ -101,6 +101,9 @@ task_manager 是一个大型任务的编排工具，底层使用的是ruby的rak
 	git clone https://github.com/lebashupian/auto_op.git
 	
 2，sh auto_op/install_src/install.sh #该文件会自动帮你完成依赖包和依赖库的安装，并会自动编译ruby到/opt目录下，还会自动帮你安装一个mysql数据库
+
 3，你需要参考hostadd.rb中的例子，添加主机信息到数据库。
+
 4，然后你可以开始参考doauto的help信息来操作远程主机了
+
 5，如果你需要定义很多的执行任务，并且定义执行任务之间的先后依赖关系，你需要参考task_manager.conf文件，修改里面的配置。然后通过task_manager命令来发动任务执行
