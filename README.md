@@ -88,6 +88,11 @@ cat <<EOF>> /etc/profile
 export PATH=/opt/ruby2.5.3/bin:$PATH
 EOF
 source /etc/profile
+	
+	[root@ruby auto_op]# cat <<EOF>> /etc/profile
+	> export PATH=/opt/ruby2.5.3/bin:$PATH
+	> EOF
+
 
 gem sources --remove https://rubygems.org/
 gem sources --add https://gems.ruby-china.com
