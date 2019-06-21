@@ -78,6 +78,7 @@ module M_常量
 		假如，你的--host=.all. 代表你要在所有的主机上执行命令.
 		假如，你的--host=.all.web.php. 代码你是在 43、44、45这三台机器上执行命令
 		所以，它是一个从前往后模糊匹配的方式实现的。
+		3, 假如你的命令返回 Too many connections，你需要检查你的mysql配置文件 my.cnf max_connections 是不是太小了
 
 	}
 end
