@@ -251,7 +251,7 @@ class C_自动化操作
 			begin 
 				Net::SSH.start(主机ip,用户名,:port => 端口 , :password => 密码) do |ssh|
 					  输出命令 = ssh.exec!("
-					  	date > /dev/null 2>>/dev/shm/ssh.rb.error.log && echo #{主机ip}'连接成功' || echo #{主机ip}'连接成功,但命令执行失败';
+					  	date > /dev/null  && echo #{主机ip}'连接成功' || echo #{主机ip}'连接成功,但date命令执行失败';
 					  ")
 					  输出队列=@输出对象.生成一个队列
 					  输出命令.each_line {|行|
@@ -274,10 +274,10 @@ class C_自动化操作
 		Net::SFTP.start(主机ip参数, 用户名参数, :password => 密码参数,:port => 端口参数) do |sftp|
 			begin
 				sftp.upload! 本地路径参数 , 远程路径参数
-				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + "上载完成"
+				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(0,1,2,3).join('.') + " -> " + "上载完成"
 			rescue Exception => e
 				#puts e.message
-				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + e.message
+				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(0,1,2,3).join('.') + " -> " + e.message
 			end
 			
 		end
@@ -287,9 +287,9 @@ class C_自动化操作
 		Net::SFTP.start(主机ip参数, 用户名参数, :password => 密码参数,:port => 端口参数) do |sftp|
 			begin
 				sftp.download! 远程路径参数 , 本地路径参数 + '/' + 主机ip参数 + 用户名参数 + 端口参数.to_s
-				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + "下载完成"
+				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(0,1,2,3).join('.') + " -> " + "下载完成"
 			rescue Exception => e
-				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + e.message
+				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(0,1,2,3).join('.') + " -> " + e.message
 			end
 			
 		end		
@@ -332,7 +332,7 @@ class C_自动化操作
 					end
 
 				  	输出命令.each_line {|行|
-				  		输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + 行.strip
+				  		输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(0,1,2,3).join('.') + " -> " + 行.strip
 				  	}
 				  	#sleep 1
 
@@ -341,7 +341,7 @@ class C_自动化操作
 					运行记录.save		
 			end
 		rescue  => 错误信息 #因为是并发的连接，可能会获取多行错误信息
-					输出队列参数 << "@主机" + " #{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " +"#{错误信息}"
+					输出队列参数 << "@主机" + " #{主机ip参数}".split('.').values_at(0,1,2,3).join('.') + " -> " +"#{错误信息}"
 		ensure
 			#exit 102
 		end
