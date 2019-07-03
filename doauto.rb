@@ -2,9 +2,7 @@
 # coding: utf-8
 
 begin  #所有程序都放在一个测试块中，来捕捉Ctrl-C
-
 require_relative "basic_funcion"
-
 #
 # 这部分异常处理，主要是为了兼容脚本里面调用doauto，因为无法正常输出进度条而导致的报错
 #
@@ -20,13 +18,7 @@ end
 # 先判断是否有参数
 # # 判断是否是需要help
 (M_常量::CONS_帮助信息.each_line {|x| puts x};exit 2;) if ARGV[0] == nil or ARGV.include? "--help"
-
-
-
-
-(M_常量::CONS_FAQ.each_line {|x| puts x};exit 2;) if ARGV.include? "--faq"
-
-
+(M_常量::CONS_FAQ.each_line {|x| puts x};exit 2;)     if ARGV.include? "--faq"
 
 #######################################################
 # 脚本参数处理
@@ -121,6 +113,7 @@ $配置文件=YAML.load(File.open(YAML_FILE,'r'));
 ################
 # 数据库连接
 ################
+db_adapter=$配置文件["database"]["db_adapter"]
 db_host=$配置文件["database"]["db_host"]
 db_user=$配置文件["database"]["db_user"]
 db_schema=  $配置文件["database"]["db_schema"]
@@ -128,7 +121,7 @@ db_pwd= $配置文件["database"]["db_pwd"]
 
 
 ActiveRecord::Base.establish_connection(
-	:adapter  => "mysql2",  
+	:adapter  => db_adapter,  
     :username => db_user,  
     :password => db_pwd,  
     :database => db_schema,  

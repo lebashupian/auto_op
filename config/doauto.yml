@@ -9,6 +9,7 @@ config:
   # 批量执行命令的并发量
   thread_concurrency: 50
 database:
+  db_adapter: "mysql2"
   db_host: "127.0.0.1"
   db_user: "root"
   db_schema: "auto_op2"
