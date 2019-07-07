@@ -113,21 +113,38 @@ $配置文件=YAML.load(File.open(YAML_FILE,'r'));
 ################
 # 数据库连接
 ################
+db_select=$配置文件["database"]["db_select"]
 db_adapter=$配置文件["database"]["db_adapter"]
 db_host=$配置文件["database"]["db_host"]
 db_user=$配置文件["database"]["db_user"]
 db_schema=  $配置文件["database"]["db_schema"]
 db_pwd= $配置文件["database"]["db_pwd"]
 
+sqlite_adapter=$配置文件["database"]["sqlite_adapter"]
+sqlite_database=$配置文件["database"]["sqlite_database"]
+sqlite_pool=$配置文件["database"]["sqlite_pool"]
+sqlite_timeout=$配置文件["database"]["sqlite_timeout"]
 
-ActiveRecord::Base.establish_connection(
-	:adapter  => db_adapter,  
-    :username => db_user,  
-    :password => db_pwd,  
-    :database => db_schema,  
-    :host     => db_host,
-    :pool     => 10_1000  #如果这个设置的过小，下面并发的函数会报错
-)
+
+if db_select == 'mysql'
+	ActiveRecord::Base.establish_connection(
+		:adapter  => db_adapter,  
+	    :username => db_user,  
+	    :password => db_pwd,  
+	    :database => db_schema,  
+	    :host     => db_host,
+	    :pool     => 10_0000  #如果这个设置的过小，下面并发的函数会报错
+	)
+elsif  db_select == 'sqlite3'
+	ActiveRecord::Base.establish_connection(
+		:adapter  => sqlite_adapter,   
+	    :database => sqlite_database,  
+	    :pool     => sqlite_pool #如果这个设置的过小，下面并发的函数会报错
+	)
+end
+	
+
+
 
 class C_数据库连接 < ActiveRecord::Base
 end
@@ -191,7 +208,7 @@ end
 
 
 C_数据库连接.connection.execute("delete from run_log;")
-C_数据库连接.connection.execute("commit;")
+C_数据库连接.connection.execute("commit;") if db_select != 'sqlite3'
 
 
 
