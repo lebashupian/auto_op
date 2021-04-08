@@ -2,9 +2,7 @@
 # coding: utf-8
 
 begin  #所有程序都放在一个测试块中，来捕捉Ctrl-C
-
 require_relative "basic_funcion"
-
 #
 # 这部分异常处理，主要是为了兼容脚本里面调用doauto，因为无法正常输出进度条而导致的报错
 #
@@ -20,13 +18,7 @@ end
 # 先判断是否有参数
 # # 判断是否是需要help
 (M_常量::CONS_帮助信息.each_line {|x| puts x};exit 2;) if ARGV[0] == nil or ARGV.include? "--help"
-
-
-
-
-(M_常量::CONS_FAQ.each_line {|x| puts x};exit 2;) if ARGV.include? "--faq"
-
-
+(M_常量::CONS_FAQ.each_line {|x| puts x};exit 2;)     if ARGV.include? "--faq"
 
 #######################################################
 # 脚本参数处理
@@ -121,20 +113,38 @@ $配置文件=YAML.load(File.open(YAML_FILE,'r'));
 ################
 # 数据库连接
 ################
+db_select=$配置文件["database"]["db_select"]
+db_adapter=$配置文件["database"]["db_adapter"]
 db_host=$配置文件["database"]["db_host"]
 db_user=$配置文件["database"]["db_user"]
 db_schema=  $配置文件["database"]["db_schema"]
 db_pwd= $配置文件["database"]["db_pwd"]
 
+sqlite_adapter=$配置文件["database"]["sqlite_adapter"]
+sqlite_database=$配置文件["database"]["sqlite_database"]
+sqlite_pool=$配置文件["database"]["sqlite_pool"]
+sqlite_timeout=$配置文件["database"]["sqlite_timeout"]
 
-ActiveRecord::Base.establish_connection(
-	:adapter  => "mysql2",  
-    :username => db_user,  
-    :password => db_pwd,  
-    :database => db_schema,  
-    :host     => db_host,
-    :pool     => 10_1000  #如果这个设置的过小，下面并发的函数会报错
-)
+
+if db_select == 'mysql'
+	ActiveRecord::Base.establish_connection(
+		:adapter  => db_adapter,  
+	    :username => db_user,  
+	    :password => db_pwd,  
+	    :database => db_schema,  
+	    :host     => db_host,
+	    :pool     => 10_0000  #如果这个设置的过小，下面并发的函数会报错
+	)
+elsif  db_select == 'sqlite3'
+	ActiveRecord::Base.establish_connection(
+		:adapter  => sqlite_adapter,   
+	    :database => sqlite_database,  
+	    :pool     => sqlite_pool #如果这个设置的过小，下面并发的函数会报错
+	)
+end
+	
+
+
 
 class C_数据库连接 < ActiveRecord::Base
 end
@@ -198,7 +208,7 @@ end
 
 
 C_数据库连接.connection.execute("delete from run_log;")
-C_数据库连接.connection.execute("commit;")
+C_数据库连接.connection.execute("commit;") if db_select != 'sqlite3'
 
 
 
@@ -251,7 +261,7 @@ class C_自动化操作
 			begin 
 				Net::SSH.start(主机ip,用户名,:port => 端口 , :password => 密码) do |ssh|
 					  输出命令 = ssh.exec!("
-					  	date > /dev/null 2>>/dev/shm/ssh.rb.error.log && echo #{主机ip}'连接成功' || echo #{主机ip}'连接成功,但命令执行失败';
+					  	date > /dev/null  && echo #{主机ip}'连接成功' || echo #{主机ip}'连接成功,但date命令执行失败';
 					  ")
 					  输出队列=@输出对象.生成一个队列
 					  输出命令.each_line {|行|
@@ -274,10 +284,10 @@ class C_自动化操作
 		Net::SFTP.start(主机ip参数, 用户名参数, :password => 密码参数,:port => 端口参数) do |sftp|
 			begin
 				sftp.upload! 本地路径参数 , 远程路径参数
-				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + "上载完成"
+				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(0,1,2,3).join('.') + " -> " + "上载完成"
 			rescue Exception => e
 				#puts e.message
-				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + e.message
+				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(0,1,2,3).join('.') + " -> " + e.message
 			end
 			
 		end
@@ -287,9 +297,9 @@ class C_自动化操作
 		Net::SFTP.start(主机ip参数, 用户名参数, :password => 密码参数,:port => 端口参数) do |sftp|
 			begin
 				sftp.download! 远程路径参数 , 本地路径参数 + '/' + 主机ip参数 + 用户名参数 + 端口参数.to_s
-				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + "下载完成"
+				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(0,1,2,3).join('.') + " -> " + "下载完成"
 			rescue Exception => e
-				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + e.message
+				输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(0,1,2,3).join('.') + " -> " + e.message
 			end
 			
 		end		
@@ -332,7 +342,7 @@ class C_自动化操作
 					end
 
 				  	输出命令.each_line {|行|
-				  		输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " + 行.strip
+				  		输出队列参数 << "@主机" + "#{主机ip参数}".split('.').values_at(0,1,2,3).join('.') + " -> " + 行.strip
 				  	}
 				  	#sleep 1
 
@@ -341,7 +351,7 @@ class C_自动化操作
 					运行记录.save		
 			end
 		rescue  => 错误信息 #因为是并发的连接，可能会获取多行错误信息
-					输出队列参数 << "@主机" + " #{主机ip参数}".split('.').values_at(2,3).join('.') + " -> " +"#{错误信息}"
+					输出队列参数 << "@主机" + " #{主机ip参数}".split('.').values_at(0,1,2,3).join('.') + " -> " +"#{错误信息}"
 		ensure
 			#exit 102
 		end

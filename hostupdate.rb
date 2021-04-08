@@ -54,68 +54,12 @@ end
 #
 # demo，添加本地主机为远程主机。主要用于基本测试
 #
+allhost=C_主机表.all()
 
-10.times {|x|
-	x += 1
-	ip='127.0.0.' + x.to_s
-        主机表=C_主机表.new
-        主机表.ip=ip
-        主机表.username='ceshi'
-        主机表.password='1234'
-        主机表.port=22
-        主机表.grp='.all.test'
-        主机表.used='Y'
-        主机表.save
+allhost.each {|host|
+	host.port='9033'
+	host.port='3333' if host.ip=='127.0.0.1'
+	host.grp='.all.db' if host.ip=='127.0.0.2'
+	host.save
 }
 puts "主机添加完成，你需要在添加一个用户ceshi,密码是1234,测试完成之后，请删除本地用户"
-
-exit
-
-
-#
-# 范例1，批量添加连续ip主机到数据库
-#
-
-i=10000
-100.times {|x|
-	x=x+i
-	p x
-	主机表=C_主机表.new
-	主机表.ip='192.168.137.102'
-	主机表.username='root'
-	主机表.password='1234'
-	主机表.port=x
-	主机表.grp='.all.test'
-	主机表.used='Y'
-	主机表.save
-}
-
-#
-# 范例2，添加不连续ip主机到数据库
-# 比如 192.168.137.18-45 和 192.168.137.66 192.168.137.68
-
-
-主机数组=[]
-
-#
-# 定义一个范围
-#
-(18..45).each {|x|
-	ip = "192.168.137." + x.to_s
-	主机数组 << ip 
-}
-
-主机数组 << '192.168.137.66'
-主机数组 << '192.168.137.68'
-
-主机数组.each {|ip地址|
-	主机表=C_主机表.new
-	主机表.ip=ip地址
-	主机表.username='root'
-	主机表.password='1234'
-	主机表.port=22
-	主机表.grp='.all.test'
-	主机表.used='Y'
-	主机表.save	
-}
-
