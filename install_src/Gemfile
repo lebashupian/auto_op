@@ -1,5 +1,5 @@
 source 'https://gems.ruby-china.com'
-gem 'activerecord','5.2.1'
+gem 'activerecord','5.2.4.5'
 gem 'net-ssh','4.2.0'
 gem 'progress_bar','1.2.0'
 gem 'wxl_process_bar','1.1.2'
